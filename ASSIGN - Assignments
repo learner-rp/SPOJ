@@ -1,0 +1,64 @@
+// ASSIGN - Assignments
+
+#include<bits/stdc++.h>
+#include<bitset>
+using namespace std;
+typedef long long int ll;
+#define deb(x) cout<<#x<<" "<<x<<"\n";
+#define fo(i,a,b) for(i=a;i<b;i++)
+const int inf=1e8;
+ 
+int mnm(){return INT_MAX;}
+ 
+template<typename... T>
+int mnm(int a,T... args){
+    return min(a,mnm(args...));
+}
+ 
+template<typename... T>
+void read(T&... args){
+    ((cin>>args), ...);
+}
+ 
+template<typename... T>
+void write(T... args){
+    ((cout<<args<<"\n"), ...);
+}
+ 
+ll n,table[21][21],dp[3000000];
+ 
+ll get_set_bits(int mask){
+    ll ans=0;
+    while(mask){
+        mask=mask&(mask-1);
+        ans++;
+    }
+    return ans;
+}
+ 
+ll getans(int mask){
+    ll x=get_set_bits(mask);
+    if(x==n) return 1;
+    if(dp[mask]!=-1) return dp[mask];
+    ll ans=0,i,j;
+    fo(i,0,n){
+        j=n-1-i;
+        if(((mask&(1<<j))==0)&&table[x][i]) ans+=getans(mask|(1<<j));
+    }
+    dp[mask]=ans;
+    return ans;
+}
+ 
+int main(){
+    ll i,j,c;
+    read(c);
+    while(c--){
+        memset(dp,-1,sizeof(dp));
+        read(n);
+        fo(i,0,n)
+            fo(j,0,n)
+                cin>>table[i][j];
+        write(getans(0));
+    }
+    return 0;
+}
