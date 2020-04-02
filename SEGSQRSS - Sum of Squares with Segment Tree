@@ -1,0 +1,149 @@
+// SEGSQRSS - Sum of Squares with Segment Tree
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MAX 100005
+
+struct u{ int l_sum,s_sum; };
+struct v{ int x,u_t; };
+
+u tree[3*MAX];
+v lazy[3*MAX];
+int a[MAX];
+
+void build(int node,int start,int end){
+    if(start==end){
+        tree[node].l_sum=a[start];
+        tree[node].s_sum=a[start]*a[start];
+        return ;
+    }
+    int mid=(start+end)/2;
+    build(2*node+1,start,mid);
+    build(2*node+2,mid+1,end);
+    tree[node].l_sum=tree[2*node+1].l_sum+tree[2*node+2].l_sum;
+    tree[node].s_sum=tree[2*node+1].s_sum+tree[2*node+2].s_sum;
+}
+
+void update(int node,int start,int end,int l,int r,int val,int u_t){
+    if(lazy[node].x!=0){
+        if(lazy[node].u_t==2){
+            tree[node].s_sum+=(end-start+1)*lazy[node].x*lazy[node].x+2*lazy[node].x*tree[node].l_sum;
+            tree[node].l_sum+=(end-start+1)*lazy[node].x;
+            if(start!=end){
+                lazy[2*node+1].x+=lazy[node].x;
+                lazy[2*node+1].u_t=lazy[node].u_t;
+                lazy[2*node+2].x+=lazy[node].x;
+                lazy[2*node+2].u_t=lazy[node].u_t;
+            }
+        }
+        else if(lazy[node].u_t==1){
+            tree[node].l_sum=(end-start+1)*lazy[node].x;
+            tree[node].s_sum=(end-start+1)*lazy[node].x*lazy[node].x;
+            if(start!=end){
+                lazy[2*node+1].x=lazy[node].x;
+                lazy[2*node+1].u_t=lazy[node].u_t;
+                lazy[2*node+2].x=lazy[node].x;
+                lazy[2*node+2].u_t=lazy[node].u_t;
+            }
+        }
+        lazy[node].x=0;
+        lazy[node].u_t=0;
+    }
+    if(start>end||end<l||start>r) return ;
+    if(l<=start&&end<=r){
+        if(u_t==2){
+            tree[node].s_sum+=(end-start+1)*val*val+2*val*tree[node].l_sum;
+            tree[node].l_sum+=(end-start+1)*val;
+            if(start!=end){
+                lazy[2*node+1].x+=val;
+                lazy[2*node+1].u_t=2;
+                lazy[2*node+2].x+=val;
+                lazy[2*node+2].u_t=2;
+            }
+        }
+        else if(u_t==1){
+            tree[node].l_sum=(end-start+1)*val;
+            tree[node].s_sum=(end-start+1)*val*val;
+            if(start!=end){
+                lazy[2*node+1].x=val;
+                lazy[2*node+1].u_t=1;
+                lazy[2*node+2].x=val;
+                lazy[2*node+2].u_t=1;
+            }
+        }
+        return ;
+    }
+    int mid=(start+end)/2;
+    update(2*node+1,start,mid,l,r,val,u_t);
+    update(2*node+2,mid+1,end,l,r,val,u_t);
+    tree[node].l_sum=tree[2*node+1].l_sum+tree[2*node+2].l_sum;
+    tree[node].s_sum=tree[2*node+1].s_sum+tree[2*node+2].s_sum;
+}
+
+int query(int node,int start,int end,int l,int r){
+    if(lazy[node].x!=0){
+        if(lazy[node].u_t==2){
+            tree[node].s_sum+=(end-start+1)*lazy[node].x*lazy[node].x+2*lazy[node].x*tree[node].l_sum;
+            tree[node].l_sum+=(end-start+1)*lazy[node].x;
+            if(start!=end){
+                lazy[2*node+1].x+=lazy[node].x;
+                lazy[2*node+1].u_t=lazy[node].u_t;
+                lazy[2*node+2].x+=lazy[node].x;
+                lazy[2*node+2].u_t=lazy[node].u_t;
+            }
+        }
+        else if(lazy[node].u_t==1){
+            tree[node].l_sum=(end-start+1)*lazy[node].x;
+            tree[node].s_sum=(end-start+1)*lazy[node].x*lazy[node].x;
+            if(start!=end){
+                lazy[2*node+1].x=lazy[node].x;
+                lazy[2*node+1].u_t=lazy[node].u_t;
+                lazy[2*node+2].x=lazy[node].x;
+                lazy[2*node+2].u_t=lazy[node].u_t;
+            }
+        }
+        lazy[node].x=0;
+        lazy[node].u_t=0;
+    }
+    if(start>end||end<l||start>r) return 0;
+    if(start>=l&&r>=end) return tree[node].s_sum;
+    int mid=(start+end)/2;
+    int p1=query(2*node+1,start,mid,l,r);
+    int p2=query(2*node+2,mid+1,end,l,r);
+    return p1+p2;
+}
+
+int main() {
+	int t,p,n,q,st,nd,x;
+	cin>>t;
+	for(int i=1;i<=t;i++){
+	    bool s=true;
+	    cin>>n>>q;
+	    u t1;
+	    t1.l_sum=0;
+	    t1.s_sum=0;
+	    v t2;
+	    t2.x=0;
+	    t2.u_t=0;
+	    for(int i=0;i<3*MAX;i++){ tree[i]=t1; lazy[i]=t2; }
+	    for(int i=0;i<n;i++) cin>>a[i];
+	    build(0,0,n-1);
+	    while(q--){
+	        cin>>p>>st>>nd;
+	        if(p<2){
+	            cin>>x;
+	            update(0,0,n-1,st-1,nd-1,x,p+1);
+	        }
+	        else{
+	            if(s){ 
+	                cout<<"Case "<<i<<":\n";
+	                s=false;
+	            }
+	            cout<<query(0,0,n-1,st-1,nd-1)<<"\n";
+	        }
+	    }
+	}
+	return 0;
+}
+
