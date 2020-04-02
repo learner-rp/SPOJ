@@ -1,0 +1,47 @@
+// NAJPF - Pattern Find
+
+#include<bits/stdc++.h>
+using namespace std;
+ 
+template<typename... T>
+void read(T&... args){
+    ((cin>>args),...);
+}
+template<typename... T>
+void write(T... args){
+    ((cout<<args), ...);
+}
+ 
+const long long int p=31,m=1e9+9;
+ 
+int main(){
+    int t,b,ans;
+    read(t);
+    while(t--){
+        string a,b;
+        read(a,b);
+        int n=a.size(),o=b.size();
+        vector<long long int> p_pow(n),h(n),occurences;
+        p_pow[0]=1;
+        for(int i=1;i<n;i++)
+            p_pow[i]=(p*p_pow[i-1])%m;
+        h[0]=(a[0]-'a'+1)%m;
+        for(int i=1;i<n;i++)
+            h[i]=(h[i-1]+(a[i]-'a'+1)*p_pow[i])%m;
+        long long int h_b=0;
+        for(int i=0;i<o;i++)
+            h_b=(h_b+(b[i]-'a'+1)*p_pow[i])%m;
+        int q=0;
+        for(int i=0;i+o-1<n;i++){
+            if((h_b*p_pow[i])%m==(h[i+o-1]-q+m)%m)
+                occurences.push_back(i+1);
+            q=h[i];
+        }
+        if(occurences.empty()) write("Not Found");
+        else{
+            write(occurences.size(),"\n");
+            for(int c:occurences) write(c," ");
+        }
+        write("\n\n");
+    }
+}
